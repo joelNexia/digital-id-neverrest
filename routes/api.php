@@ -20,5 +20,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 
-Route::post('digital-id', [BloockController::class, 'create']);
-
+Route::group(['middleware' => ['api.key']], function () {
+    Route::post('digital-id', [BloockController::class, 'create']);
+});

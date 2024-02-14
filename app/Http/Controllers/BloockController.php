@@ -20,7 +20,10 @@ class BloockController extends Controller
             $identity = $bloock->createIdentity();
 
             $digitalId = $bloock->issuance($identity,$request->email);
-            return $digitalId;
+            return [
+                'identity'=>$identity,
+                'digital_id'=>$digitalId
+            ];
         }
     }
 }
