@@ -53,7 +53,7 @@ class BloockHelper extends Bloock {
         
         $data=(object)[];
         $data->key = $createdHolderKey->localKey->key;
-        $data->privateKey = $createdHolderKey->localKey->privateKey;
+        $data->private_key = $createdHolderKey->localKey->privateKey;
         $data->did = $createdHolderDid;
          
 
