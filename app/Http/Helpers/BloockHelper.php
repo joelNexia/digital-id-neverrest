@@ -2,12 +2,14 @@
 namespace App\Http\Helpers;
 
 use Bloock\Bloock;
-use Bloock\Client\IdentityClient;
 use Bloock\Client\KeyClient;
+use Bloock\Client\IdentityClient;
+use Bloock\Entity\Key\KeyType;
+use Bloock\Entity\Key\Key;
+use Bloock\Entity\Identity\DidMethod;
 use Bloock\Entity\IdentityV2\BjjIdentityKey;
 use Bloock\Entity\IdentityV2\IdentityKeyArgs;
 use Bloock\Entity\Key\KeyProtectionLevel;
-use Bloock\Entity\Key\KeyType;
 use Bloock\Entity\Key\ManagedKeyParams;
 use GuzzleHttp\Client;
 //use Http\Adapter\Guzzle6\Client;
@@ -29,22 +31,31 @@ class BloockHelper extends Bloock {
      * @return object
      */
     public function createIdentity(){
-        $identityClient = new IdentityClient();
+
+        // initialize the Key Client
         $keyClient = new KeyClient();
+        // initialize the IdentityClient
+        $identityClient = new IdentityClient();
 
-        $keyProtection = KeyProtectionLevel::SOFTWARE;
-        $keyType = KeyType::Bjj;
+        // create the Baby JubJub local
+        $localKey = $keyClient->newLocalKey(KeyType::Bjj);
 
-        $params = new ManagedKeyParams($keyProtection, $keyType);
-        $key = $keyClient->newManagedKey($params);
+        // we create the holder, passing the Baby JubJub key and holder did method
+        $holderKey = new Key($localKey);
+        $holderDidMethod = DidMethod::PolygonID;
 
-        $identityKey = new BjjIdentityKey(new IdentityKeyArgs($key));
+        $holder = $identityClient->createHolder($holderKey, $holderDidMethod);
 
-        $identity = $identityClient->createIdentity($identityKey, null);
+        $createdHolderDid = $holder->getDid()->getDid(); // will print the Holder DID public identifier. Ex: did:polygonid:polygon:main:2qCU58EJgrELSJT6EzT27Rw9DhvwamAdbMLpePztYq
+        $createdHolderDidMethod = $holder->getDid()->getDidMethod(); // will return the DID method we chosed. Ex: identity.PolygonID
+        $createdHolderKey = $holder->getKey(); // will return the Key BJJ object associated to the Holder.
 
+        
         $data=(object)[];
-        $data->key = $key->id;
-        $data->did = $identity;
+        $data->key = $createdHolderKey->localKey->key;
+        $data->privateKey = $createdHolderKey->localKey->privateKey;
+        $data->did = $createdHolderDid;
+         
 
         return $data;
     }
